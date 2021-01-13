@@ -110,13 +110,14 @@ def move(tree, dataset, args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--partition", required=True, type=str,
-                        help="Choose between train, val and test")
+                        help="Choose amongst train, val, trainval and test")
     args = parser.parse_args()
     
     image_root = dict(
         train='../mscoco2014/train2014',
         val='../mscoco2014/train2014',
-        test='../mscoco/test2014'
+        trainval='../mscoco2014/train2014',
+        test='../mscoco2014/val2014'
     )
     dataset = VCOCO(
         root=image_root[args.partition],
