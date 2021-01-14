@@ -51,7 +51,7 @@ class VCOCO(ImageDataset):
 
     def __len__(self) -> int:
         """Return the number of images"""
-        return len(self._image_ids)
+        return len(self._keep)
 
     def __getitem__(self, i: int) -> Tuple[Any, Any]:
         """
@@ -79,13 +79,12 @@ class VCOCO(ImageDataset):
                 objects: List[int]
                     Object category index for each object in human-object pairs. The
                     indices follow the COCO2014 (91 classes) standard
-                file_name: str
-                    Name of the image file
         """
         image = self.load_image(os.path.join(
             self._root, self.filename(i)
         ))
-        target = self._anno[i]
+        target = self._anno[self._keep[i]].copy()
+        target.pop('file_name')
         return self._transforms(image, target)
 
     def __repr__(self) -> str:
@@ -137,7 +136,7 @@ class VCOCO(ImageDataset):
     @property
     def object_to_action(self) -> Dict[int, list]:
         """Return the list of actions for each object"""
-        object_to_action = {obj: [] for obj in self._objects}
+        object_to_action = {obj: [] for obj in list(range(1, 81))}
         for act, obj in enumerate(self._action_to_object):
             for o in obj:
                 if act not in object_to_action[o]:
@@ -146,7 +145,7 @@ class VCOCO(ImageDataset):
 
     def filename(self, idx: int) -> str:
         """Return the image file name given the index"""
-        return self._anno[idx]['file_name']
+        return self._anno[self._keep[idx]]['file_name']
 
     def image_size(self, idx: int) -> Tuple[int, int]:
         """Return the size (width, height) of an image"""
@@ -161,9 +160,14 @@ class VCOCO(ImageDataset):
         self._objects = f['objects']
         self._image_ids = f['images']
 
+        keep = list(range(len(f['images'])))
         num_instances = [0 for _ in range(len(f['classes']))]
         valid_objects = [[] for _ in range(len(f['classes']))]
-        for anno_in_image in f['annotations']:
+        for i, anno_in_image in enumerate(f['annotations']):
+            # Remove images without human-object pairs
+            if len(anno_in_image['actions']) == 0:
+                keep.remove(i)
+                continue
             for act, obj in zip(anno_in_image['actions'], anno_in_image['objects']):
                 num_instances[act] += 1
                 if obj not in valid_objects[act]:
@@ -173,3 +177,4 @@ class VCOCO(ImageDataset):
         self._present_objects = np.unique(np.asarray(objects)).tolist()
         self._action_to_object = valid_objects
         self._num_instances = num_instances
+        self._keep = keep
