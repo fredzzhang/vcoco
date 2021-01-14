@@ -47,6 +47,28 @@ INTERACTIONS = [
     'catch obj', 'cut instr', 'cut obj', 'work_on_computer instr', 'ski instr', 'surf instr',
     'skateboard instr', 'drink instr', 'kick obj', 'read obj', 'snowboard instr'
 ]
+OBJECTS = [
+    'background', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train',
+    'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench',
+    'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe',
+    'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard',
+    'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
+    'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
+    'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza',
+    'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet',
+    'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven',
+    'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
+    'hair drier', 'toothbrush'
+]
+KEEP = [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18,
+    19, 20, 21, 22, 23, 24, 25, 27, 28, 31, 32, 33, 34, 35, 36,
+    37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 52,
+    53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 70,
+    72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 84, 85, 86, 87,
+    88, 89, 90
+]
+COCOIDX = {k: i for i, k in enumerate(KEEP)}
 
 if __name__ == '__main__':
 
@@ -55,12 +77,12 @@ if __name__ == '__main__':
                         help="Path to the pickle file with annotations for a partition")
     parser.add_argument('--partition', required=True, type=int,
                         help="Dataset partition the pickle file corresponds to. " \
-                        + "Use 0 for training set, 1 for validation set and 2 for test set")
+                        + "Use 0 for train, val and trainval partitions and 1 for test")
     args = parser.parse_args()
 
     fname = args.pickle
     partition = args.partition
-    assert partition in [0, 1, 2], "Incorrect partition number"
+    assert partition in [0, 1], "Incorrect partition number"
 
     with open(fname, 'rb') as f:
         a = pickle.load(f, encoding='latin1')
@@ -69,7 +91,7 @@ if __name__ == '__main__':
     nimage = len(unique_im_id)
 
     def anno_template(image_id, partition):
-        if partition in [0, 1]:
+        if partition == 0:
             prefix = 'COCO_train2014'
         else:
             prefix = 'COCO_val2014'
@@ -107,11 +129,12 @@ if __name__ == '__main__':
                 anno[k]['boxes_h'].append(bh.tolist())
                 anno[k]['boxes_o'].append(bo.tolist())
                 anno[k]['actions'].append(idx)
-                anno[k]['objects'].append(data['obj_category'][j, i + 1])
+                anno[k]['objects'].append(COCOIDX[int(data['obj_category'][j, i + 1])])
 
     with open(fname.replace('.pkl', '.json'), 'w') as f:
         json.dump(dict(
             annotations=anno,
             classes=INTERACTIONS,
+            objects=OBJECTS,
             images=unique_im_id
         ), f)
