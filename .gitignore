@@ -2,3 +2,15 @@ __pycache__
 
 # Dataset
 mscoco2014
+
+# Visualised results
+visualisations
+*.html
+
+# Checkpoints
+checkpoints
+
+# Detections
+detections/train*
+detections/val*
+detections/test*
