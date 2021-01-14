@@ -7,6 +7,7 @@ if [ -d $DIR/$TRAIN ];
 then
     echo "$DIR/$TRAIN already exists."
 else
+    mkdir $DIR
     wget http://images.cocodataset.org/zips/train2014.zip
     echo "Unzipping training set...this will take a few minutes"
     unzip train2014.zip &>train
