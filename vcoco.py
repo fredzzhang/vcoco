@@ -9,8 +9,10 @@ Australian Centre for Robotic Vision
 
 import os
 import json
+import itertools
+import numpy as np
 
-from typing import Optional, List, Callable, Tuple, Any
+from typing import Optional, List, Callable, Tuple, Any, Dict
 from pocket.data import ImageDataset
 
 class VCOCO(ImageDataset):
@@ -88,11 +90,19 @@ class VCOCO(ImageDataset):
 
     def __repr__(self) -> str:
         """Return the executable string representation"""
-        reprstr = self.__class__.__name__ + '(root=\"' + repr(self._root)
-        reprstr += '\", anno_file=\"'
+        reprstr = self.__class__.__name__ + '(root=' + repr(self._root)
+        reprstr += ', anno_file='
         reprstr += repr(self._anno_file)
-        reprstr += '\")'
+        reprstr += ')'
         # Ignore the optional arguments
+        return reprstr
+
+    def __str__(self) -> str:
+        """Return the readable string representation"""
+        reprstr = 'Dataset: ' + self.__class__.__name__ + '\n'
+        reprstr += '\tNumber of images: {}\n'.format(self.__len__())
+        reprstr += '\tImage directory: {}\n'.format(self._root)
+        reprstr += '\tAnnotation file: {}\n'.format(self._anno_file)
         return reprstr
 
     @property
@@ -101,11 +111,38 @@ class VCOCO(ImageDataset):
 
     @property
     def actions(self) -> List[str]:
+        """Return the list of actions"""
         return self._actions
 
     @property
     def objects(self) -> List[str]:
-        return NotImplementedError
+        """Return the list of objects"""
+        return self._objects
+
+    @property
+    def present_objects(self) -> List[int]:
+        """Return the list of objects that are present in the dataset partition"""
+        return self._present_objects
+
+    @property
+    def num_instances(self) -> List[int]:
+        """Return the number of human-object pairs for each action class"""
+        return self._num_instances
+
+    @property
+    def action_to_object(self) -> List[list]:
+        """Return the list of objects for each action"""
+        return self._action_to_object
+
+    @property
+    def object_to_action(self) -> Dict[int, list]:
+        """Return the list of actions for each object"""
+        object_to_action = {obj: [] for obj in self._objects}
+        for act, obj in enumerate(self._action_to_object):
+            for o in obj:
+                if act not in object_to_action[o]:
+                    object_to_action[o].append(act)
+        return object_to_action
 
     def filename(self, idx: int) -> str:
         """Return the image file name given the index"""
@@ -121,4 +158,18 @@ class VCOCO(ImageDataset):
     def _compute_metatdata(self, f: dict) -> None:
         self._anno = f['annotations']
         self._actions = f['classes']
+        self._objects = f['objects']
         self._image_ids = f['images']
+
+        num_instances = [0 for _ in range(len(f['classes']))]
+        valid_objects = [[] for _ in range(len(f['classes']))]
+        for anno_in_image in f['annotations']:
+            for act, obj in zip(anno_in_image['actions'], anno_in_image['objects']):
+                num_instances[act] += 1
+                if obj not in valid_objects[act]:
+                    valid_objects[act].append(obj)
+
+        objects = list(itertools.chain.from_iterable(valid_objects))
+        self._present_objects = np.unique(np.asarray(objects)).tolist()
+        self._action_to_object = valid_objects
+        self._num_instances = num_instances
