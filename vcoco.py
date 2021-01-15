@@ -143,6 +143,10 @@ class VCOCO(ImageDataset):
                     object_to_action[o].append(act)
         return object_to_action
 
+    def image_id(self, idx: int) -> int:
+        """Return the COCO image ID"""
+        return self._image_ids[self._keep[idx]]
+
     def filename(self, idx: int) -> str:
         """Return the image file name given the index"""
         return self._anno[self._keep[idx]]['file_name']
