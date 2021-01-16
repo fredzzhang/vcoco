@@ -25,8 +25,9 @@ Utilities for the human-object interaction detection dataset [V-COCO](https://ar
 3. Install the lightweight deep learning library [Pocket](https://github.com/fredzzhang/pocket)
 4. Make sure the environment you created for Pocket is activated. You are good to go!
 
-## Dataset Class
-The implementation of the dataset class can be found in `vcoco.py`.
+## Miscellaneous
+* The implementation of the dataset class can be found in [vcoco.py](https://github.com/fredzzhang/vcoco/blob/main/vcoco.py)
+* The script that generated the annotation files can be found in [utilities/generate_annotations.py](https://github.com/fredzzhang/vcoco/blob/main/utilities/generate_annotations.py)
 
 ## License
 
