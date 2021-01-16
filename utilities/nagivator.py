@@ -124,7 +124,7 @@ if __name__ == "__main__":
         anno_file='../instances_vcoco_{}.json'.format(args.partition)
     )
 
-    image_labels = [anno['actions'] for anno in dataset.annotations]
+    image_labels = [dataset.annotations[i]['actions'] for i in dataset._keep]
     tree = DatasetTree(24, image_labels)
 
     print(help_msg)
