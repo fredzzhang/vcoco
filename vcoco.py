@@ -78,7 +78,8 @@ class VCOCO(ImageDataset):
                     Ground truth action class for each human-object pair
                 objects: List[int]
                     Object category index for each object in human-object pairs. The
-                    indices follow the COCO2014 (91 classes) standard
+                    indices follow the 80-class standard, where 0 means background and
+                    1 means person.
         """
         image = self.load_image(os.path.join(
             self._root, self.filename(i)
