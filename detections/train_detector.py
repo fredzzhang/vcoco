@@ -61,6 +61,11 @@ class DetectorEngine(pocket.core.DistributedLearningEngine):
         super().__init__(net, None, train_loader, **kwargs)
         self._val_loader = val_loader
 
+    def _on_start_epoch(self):
+        self._state.epoch += 1
+        self._state.net.train()
+        self._train_loader.batch_sampler.sampler.set_epoch(self._state.epoch)
+
     def _on_each_iteration(self):
         self._state.output = self._state.net(*self._state.inputs, targets=self._state.targets)
         self._state.loss = sum(loss for loss in self._state.output.values())
@@ -338,17 +343,16 @@ if __name__ == '__main__':
     parser.add_argument('--world-size', required=True, type=int,
                         help="Number of subprocesses/GPUs to use")
     parser.add_argument('--data-root', type=str, default='../')
-    parser.add_argument('--training-data', nargs='+', default=['train2015',], type=str)
     parser.add_argument('--num-epochs', default=15, type=int)
     parser.add_argument('--random-seed', default=1, type=int)
-    parser.add_argument('--learning-rate', default=0.00025, type=float)
+    parser.add_argument('--learning-rate', default=0.002, type=float)
     parser.add_argument('--momentum', default=0.9, type=float)
     parser.add_argument('--weight-decay', default=1e-4, type=float)
     parser.add_argument('--batch-size', default=2, type=int)
     parser.add_argument('--milestones', nargs='+', default=[8, 12], type=int)
     parser.add_argument('--lr-decay', default=0.1, type=float)
     parser.add_argument('--aspect-ratio-group-factor', default=3, type=int)
-    parser.add_argument('--print-interval', default=2000, type=int)
+    parser.add_argument('--print-interval', default=100, type=int)
     parser.add_argument('--cache-dir', type=str, default='./checkpoints')
 
     args = parser.parse_args()
