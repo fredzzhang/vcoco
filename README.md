@@ -14,12 +14,12 @@ Utilities for the human-object interaction detection dataset [V-COCO](https://ar
 2. Download the `train2014` and `val2014` partitions of the [COCO dataset](https://cocodataset.org/#download)
     1. If you have not downloaded the dataset before, run the following script
     ```bash
-    cd /path/to/spatio-attentive-graphs/vcoco
+    cd /path/to/vcoco
     bash download.sh
     ```
     2. If you have previsouly downloaded the dataset, simply create a soft link. Note that 
     ```bash
-    cd /path/to/spatio-attentive-graphs/vcoco
+    cd /path/to/vcoco
     ln -s /path/to/coco ./mscoco2014
     ```
 3. Install the lightweight deep learning library [Pocket](https://github.com/fredzzhang/pocket)
