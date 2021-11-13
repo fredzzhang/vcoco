@@ -164,6 +164,7 @@ class VCOCO(ImageDataset):
         self._actions = f['classes']
         self._objects = f['objects']
         self._image_ids = f['images']
+        self._action_to_object = f['action_to_object']
 
         keep = list(range(len(f['images'])))
         num_instances = [0 for _ in range(len(f['classes']))]
@@ -180,6 +181,5 @@ class VCOCO(ImageDataset):
 
         objects = list(itertools.chain.from_iterable(valid_objects))
         self._present_objects = np.unique(np.asarray(objects)).tolist()
-        self._action_to_object = valid_objects
         self._num_instances = num_instances
         self._keep = keep
